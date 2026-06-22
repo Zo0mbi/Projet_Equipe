@@ -1,0 +1,13 @@
+{
+  "java.project.sourcePaths": ["android/app/src"],
+  "java.import.exclusions": [
+    "**/node_modules/**",
+    "**/android/build/**",
+    "**/.gradle/**",
+    "**/node_modules/@react-native/gradle-plugin/**",
+    "**/node_modules/@react-native-community/**"
+  ],
+  "java.import.gradle.wrapper.enabled": false,
+  "java.configuration.updateBuildConfiguration": "disabled",
+  "css.lint.unknownAtRules": "ignore"
+}

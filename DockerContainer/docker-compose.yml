@@ -1,0 +1,49 @@
+services:
+  mysql:
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    container_name: mysql
+    build: ./mysql/
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/db:/docker-entrypoint-initdb.d
+      # - ./mysql/conf.d:/etc/mysql/conf.d
+    env_file:
+      - ${MYSQL_ENV_FILE:-./mysql/prod.env}
+    environment:
+      TZ: America/Toronto
+    networks:
+      - internal
+  api:
+    depends_on:
+      mysql:
+        condition: service_healthy
+    container_name: fast_api
+    build:
+      context: ./api
+      dockerfile: dev.Dockerfile
+    restart: unless-stopped
+    volumes:
+      - ./api:/app
+    env_file:
+      - ${API_ENV_FILE:-./api/prod.env}
+    environment:
+      TZ: America/Toronto
+    networks:
+      - internal
+  cloudflared:
+    image: cloudflare/cloudflared:latest   
+    env_file:
+      - .env
+    command: tunnel run --token ${TUNNEL_TOKEN}
+    restart: unless-stopped
+    networks:
+      - internal
+volumes:
+  mysql_data:
+networks:
+  internal:
+    driver: bridge

@@ -1,0 +1,13 @@
+const { getDefaultConfig } = require('@expo/metro-config');
+
+const config = getDefaultConfig(__dirname);
+
+// Redirige lucide-react-native vers lucide-react sur le web
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (platform === 'web' && moduleName === 'lucide-react-native') {
+    return context.resolveRequest(context, 'lucide-react', platform);
+  }
+  return context.resolveRequest(context, moduleName, platform);
+};
+
+module.exports = config;

@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    # No ports mapped to host; the tunnel will talk to Nginx internally
+    expose:
+      - "80"
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared_tunnel
+    restart: unless-stopped
+    # Point the tunnel to the 'app' service name at its internal port
+    command: tunnel --no-autoupdate run --token eyJhIjoiYWQwODUwMTA3YzIyN2Q5YjdhYWZjMjJjOTQ1NWVjYWEiLCJ0IjoiMmViYzdkMjMtNmM5MC00NjlkLWE1NmYtNjc2YTFlMGFjNzZiIiwicyI6Ik1qQmlaR0l6TURZdFlUZ3hOQzAwTmpSbExXRTVNRFV0WTJWa056UmhZVGN4T0RVeCJ9
+    depends_on:
+      - app

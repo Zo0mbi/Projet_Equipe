@@ -1,0 +1,14 @@
+# Environment files
+prod.env
+.env
+.env.*
+!prod.env.example
+
+# MySQL runtime/data artifacts when created locally
+*.log
+*.pid
+*.err
+
+# Editor/OS noise
+.DS_Store
+Thumbs.db
