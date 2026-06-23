@@ -3,7 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
 const api = axios.create({
-  baseURL: 'https://parkflow.zo0mbi.com', // Modifié temporairement pour tester les changements locaux
+  baseURL: 'http://localhost:8000', // URL de l'API FastAPI (à changer selon l'environnement)
   headers: {
     'Content-Type': 'application/json',
   },
