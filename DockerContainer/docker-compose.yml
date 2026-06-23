@@ -1,49 +1,63 @@
+version: "3.9"
+
 services:
   mysql:
+    container_name: mysql
+    build: ./mysql/
+    restart: unless-stopped
+
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$MYSQL_ROOT_PASSWORD"]
       interval: 5s
       timeout: 5s
       retries: 10
-    container_name: mysql
-    build: ./mysql/
+
     volumes:
       - mysql_data:/var/lib/mysql
       - ./mysql/db:/docker-entrypoint-initdb.d
-      # - ./mysql/conf.d:/etc/mysql/conf.d
+
     env_file:
-      - ${MYSQL_ENV_FILE:-./mysql/prod.env}
+      - ${MYSQL_ENV_FILE:-./mysql/local.env}
+
     environment:
       TZ: America/Toronto
+
+    ports:
+      - "3306:3306"   # Port de MySQL
+
     networks:
       - internal
+
   api:
-    depends_on:
-      mysql:
-        condition: service_healthy
     container_name: fast_api
     build:
       context: ./api
       dockerfile: dev.Dockerfile
+
     restart: unless-stopped
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+
     volumes:
       - ./api:/app
+
     env_file:
-      - ${API_ENV_FILE:-./api/prod.env}
+      - ${API_ENV_FILE:-./api/local.env}
+
     environment:
       TZ: America/Toronto
+
+    ports:
+      - "8000:8000"   # Port de l'API
+
     networks:
       - internal
-  cloudflared:
-    image: cloudflare/cloudflared:latest   
-    env_file:
-      - .env
-    command: tunnel run --token ${TUNNEL_TOKEN}
-    restart: unless-stopped
-    networks:
-      - internal
+
 volumes:
   mysql_data:
+
 networks:
   internal:
     driver: bridge

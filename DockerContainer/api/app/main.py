@@ -12,15 +12,15 @@ app = FastAPI(
     title="Gestion Stationnement API",
     description="API pour gérer les stationnements et contraventions",
     version="1.0.0",
-    docs_url="/hkjfdsahkflh321432786feqdsafdsaf-32132146321784231432432fdsfgfdgsdf", # Désactive la documentation interactive Swagger UI
+    docs_url="/docs", # Désactive la documentation interactive Swagger UI
     redoc_url=None, # Désactive la documentation interactive ReDoc
-    openapi_url="/hkjfdsahkflh321432786feqdsafdsaf-32132146321784231432432fdsfgfdgsdf/openapi.json" # Désactive l'endpoint OpenAPI
+    openapi_url="/docs/openapi.json" # Désactive l'endpoint OpenAPI
 )
 # Version securiser
 cors_origins = os.getenv("CORS_ORIGINS")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://app.zo0mbi.com"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],

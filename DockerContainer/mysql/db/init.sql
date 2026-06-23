@@ -5,12 +5,12 @@ SET time_zone = 'SYSTEM';
 
 -- Compte utilisateur pour l'administration de la base de données, avec accès depuis n'importe quelle adresse IP (172.% pour limiter aux adresses IP privées, mais peut être ajusté selon les besoins)
 -- Utilisation de @172.% pour permettre l'accès depuis Docker. Une autre option pas testées est le nom du conteneur.
-CREATE USER IF NOT EXISTS 'ToothHenchAdmin832'@'172.%' IDENTIFIED
+CREATE USER IF NOT EXISTS 'ToothHenchAdmin832'@'%' IDENTIFIED
 WITH mysql_native_password BY '@DxVNTwNrefDibVyGPfyzok6T!eifeM8nfhh3hJbBvUe86dDCqpfa6V';
 
 -- Grant les permissions de la base de données.
 GRANT SELECT, INSERT, UPDATE, DELETE
-ON Parkflow_Gestionnaire_Contravention.* TO 'ToothHenchAdmin832'@'172.%';
+ON Parkflow_Gestionnaire_Contravention.* TO 'ToothHenchAdmin832'@'%';
 
 -- Ensure the changes take effect
 FLUSH PRIVILEGES;
