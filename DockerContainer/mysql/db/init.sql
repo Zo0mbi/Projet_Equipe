@@ -121,6 +121,7 @@ CREATE TABLE contravention (
     date_entrer TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     date_modification TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     modifier_par INT,
+    commentaire_admin TEXT,
 
     FOREIGN KEY (modifier_par) REFERENCES utilisateurs(id), -- 0...N with utilisateurs (optionnel, pour savoir qui a effectué la dernière modification)
     FOREIGN KEY (vehicle_id) REFERENCES vehicules(id), -- N...1 with vehicules
