@@ -138,27 +138,6 @@ CREATE TABLE contravention (
 );
 
 -- =========================
--- contestations (CONTESTATION)
--- Foreign keys : ticket_id references contravention(id) (contravention contestée),
--- user_id references utilisateurs(id) (utilisateur qui conteste)
--- Table pour Alexis, Si on rajoute cela au front end
--- =========================
-CREATE TABLE contestations (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    ticket_id INT NOT NULL,
-    user_id INT NOT NULL,
-    raison TEXT,
-    etat_contravention ENUM('en_attente', 'acceptee', 'rejetee') DEFAULT 'en_attente',
-    date_entrer TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    FOREIGN KEY (ticket_id) REFERENCES contravention(id), -- N...1 with contravention
-    FOREIGN KEY (user_id) REFERENCES utilisateurs(id), -- N...1 with utilisateurs
-    UNIQUE KEY uq_contestation_ticket_user (ticket_id, user_id),
-    INDEX idx_contestations_ticket_etat (ticket_id, etat_contravention),
-    INDEX idx_contestations_user_date (user_id, date_entrer)
-);
-
--- =========================
 -- LOGS (ADMIN)
 -- Table pour enregistrer les actions importantes dans le système, comme les tentatives d'accès non autorisées, les modifications de contraventions,etc.
 -- Foreign key : user_id references utilisateurs(id) (utilisateur qui a effectué l'action, peut être NULL pour les actions système ou les tentatives d'accès non autorisées sans utilisateur identifié)
