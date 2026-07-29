@@ -12,7 +12,7 @@ WITH mysql_native_password BY '@DxVNTwNrefDibVyGPfyzok6T!eifeM8nfhh3hJbBvUe86dDC
 GRANT SELECT, INSERT, UPDATE, DELETE
 ON Parkflow_Gestionnaire_Contravention.* TO 'ToothHenchAdmin832'@'%';
 
--- Ensure the changes take effect
+-- Assurer que les privilèges sont appliqués à la création de la base de données et à l'ajout de l'utilisateur.
 FLUSH PRIVILEGES;
 -- =========================
 -- raisons_contravention (RAISONS DE CONTRAVENTION)
@@ -162,7 +162,7 @@ CREATE TABLE logs (
 
 
 -- =========================
--- Insert initial data
+-- Import des données initiales pour les rôles, utilisateurs, emplacements et raisons de contraventions
 -- =========================
 
 -- Insert roles
