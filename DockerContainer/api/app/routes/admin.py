@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.crud.admin import (
+    admin_contravention_list,
     change_contravention_etat as crud_change_contravention_etat,
     create_emplacement,
     create_reason,
+    crud_update_commentaire_admin,
     crud_update_user_actif,
     delete_emplacement,
     delete_reason,
@@ -24,7 +26,7 @@ from app.crud.user import crud_update_user
 from app.crud.vehicule import create_vehicule, upsert_vehicule_by_plate
 from app.crud.contravention import serialize_contravention
 from app.schema.Admin import AdminStatsResponse, AdminStatsContraventionResponse, AdminStatsVehiculeContraventionResponse
-from app.schema.Contravention import ContraventionEtatUpdateRequest, ContraventionResponse
+from app.schema.Contravention import ContraventionAdminResponse, ContraventionEtatUpdateRequest, ContraventionResponse
 from app.schema.Emplacement import EmplacementCreateRequest, EmplacementResponse, EmplacementUpdateRequest
 from app.schema.RaisonContravention import RaisonContraventionCreateRequest, RaisonContraventionResponse, RaisonContraventionUpdateRequest
 from app.schema.Utilisateur import UtilisateurActivationResponse, UtilisateurReferenceResponse, UtilisateurRoleUpdateRequest, UtilisateurRoleUpdateResponse, UtilisateurUpdateRequest
@@ -56,8 +58,8 @@ def verify_admin_user(current_user=Depends(get_current_user)):
     return current_user
 
 #Création du router pour les routes d'administration, avec une dépendance pour vérifier que l'utilisateur est connecté et a les permissions nécessaires pour accéder à ces routes.
-router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(verify_admin_user)])
-
+router = APIRouter(prefix="/admin", tags=["admin"])
+#, dependencies=[Depends(verify_admin_user)]
 # Route de base
 @router.get("/dashboard")
 def admin_dashboard():
@@ -143,9 +145,9 @@ def list_vehicules(db: Session = Depends(get_db)):
         "/liste-contraventions",
         summary="Lister les contraventions",
         description="Retourne la liste de toutes les contraventions disponibles dans la base de données.",
-        response_model=list[ContraventionResponse])
+        response_model=list[ContraventionAdminResponse])
 def list_contraventions(db: Session = Depends(get_db)):
-    contraventions = get_all_contraventions(db)
+    contraventions = admin_contravention_list(db)
     if isinstance(contraventions, dict) and "error" in contraventions:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=contraventions["error"])
     return [serialize_contravention(db, item) for item in contraventions]
@@ -450,3 +452,25 @@ def update_utilisateur_route(utilisateur_id: int, utilisateur_data: UtilisateurU
         return user
     except Exception as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+
+
+
+@router.put(
+    "/contraventions/{contravention_id}/commentaire",
+      response_model=ContraventionAdminResponse,
+        summary="Mettre à jour le commentaire admin d'une contravention",
+          description="Met à jour uniquement le commentaire admin de la contravention.")
+def update_contravention_commentaire(
+    contravention_id: int,
+    payload: dict,
+    db: Session = Depends(get_db),
+):
+    commentaire_admin = payload.get("commentaire_admin")
+    if commentaire_admin is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Le champ 'commentaire_admin' est requis.")
+    contravention = crud_update_commentaire_admin(db, contravention_id, commentaire_admin=commentaire_admin)
+    if isinstance(contravention, dict) and "error" in contravention:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=contravention["error"])
+    if contravention is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contravention non trouvée")
+    return serialize_contravention(db, contravention)

@@ -230,7 +230,7 @@ class VerifierPlaqueResponse(BaseModel):
 class ContraventionListResponse(BaseModel):
     contraventions: list[ContraventionResponse] = Field(description="Liste de toutes les contraventions")
     
-
+# Schema de mise a jour partielle d'une contravention
 class UpdateContraventionRequest(BaseModel):
     """Schema de mise a jour partielle d'une contravention."""
 
@@ -294,7 +294,7 @@ class UpdateContraventionRequest(BaseModel):
     class ValidationErrorResponse(BaseModel):
         error: str = Field(description="Message d'erreur en cas de validation echouee")
 
-
+# Schema de mise a jour de l'etat d'une contravention
 class ContraventionEtatUpdateRequest(BaseModel):
     """Schema de mise a jour de l'etat d'une contravention."""
 
@@ -307,3 +307,59 @@ class ContraventionEtatUpdateRequest(BaseModel):
             }
         }
 
+# Schema de mise a jour du commentaire admin d'une contravention
+class ContraventionCommentaireAdminUpdateRequest(BaseModel):
+    """Schema de mise a jour du commentaire admin d'une contravention."""
+
+    commentaire_admin: str | None = Field(default=None, description="Commentaire admin")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "commentaire_admin": "Contravention contestée par le propriétaire du véhicule.",
+            }
+        }
+
+
+class ContraventionAdminResponse(BaseModel):
+    """Schema de reponse d'une contravention pour l'admin."""
+
+    numero_contravention: str = Field(description="Numero unique de contravention genere par le backend")
+    raison_custom: str | None = Field(default=None, description="Raison personnalisee")
+    montant: Decimal = Field(description="Montant de la contravention")
+    etat_contravention: EtatContravention = Field(description="Etat courant de la contravention")
+    vehicule: VehiculeReferenceResponse | None = Field(default=None, description="Details du vehicule")
+    attribuer_par_utilisateur: UtilisateurReferenceResponse | None = Field(
+        default=None,
+        description="Details de l'utilisateur ayant attribue la contravention",
+    )
+    emplacement: EmplacementReferenceResponseComplete | None = Field(default=None, description="Details de l'emplacement",)
+    raison_contravention: RaisonContraventionReferenceResponse | None = Field(
+        default=None,
+        description="Details de la raison de contravention",
+    )
+    modifier_par_utilisateur: UtilisateurReferenceResponse | None = Field(
+        default=None,
+        description="Details du dernier utilisateur ayant modifie",
+    )
+    date_entrer: datetime = Field(description="Date de creation")
+    date_modification: datetime = Field(description="Date de derniere modification")
+    commentaire_admin: str | None = Field(default=None, description="Commentaire admin")
+
+    class Config:
+        from_attributes = True
+
+class ContraventionAdminListResponse(BaseModel):
+    contraventions: list[ContraventionAdminResponse] = Field(description="Liste de toutes les contraventions pour l'admin")
+
+class CommentaireAdminUpdate(BaseModel):
+    """Schema de mise a jour du commentaire admin d'une contravention."""
+
+    commentaire_admin: str | None = Field(default=None, description="Commentaire admin")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "commentaire_admin": "Contravention contestée par le propriétaire du véhicule.",
+            }
+        }

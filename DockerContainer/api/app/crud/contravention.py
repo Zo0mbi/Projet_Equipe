@@ -366,6 +366,7 @@ def update_contravention(
             "montant",
             "etat_contravention",
             "emplacement_id",
+            "commentaire_admin",
         }
 
     # On ne met à jour que les champs présents dans contravention_data et qui sont autorisés

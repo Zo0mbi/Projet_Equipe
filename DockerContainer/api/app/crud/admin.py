@@ -541,3 +541,40 @@ def get_vehicule_contravention_stats(db: Session):
         ]
     except Exception as e:
         return {"detail": f"Erreur lors de la recuperation des statistiques: {str(e)}"}
+
+
+def crud_update_commentaire_admin(db: Session, contravention_id: int, commentaire_admin: str):
+    """Met à jour le commentaire admin d'une contravention."""
+    try:
+        contravention = db.query(Contravention).filter(Contravention.id == contravention_id).first()
+        if contravention is None:
+            return None
+
+        contravention.commentaire_admin = commentaire_admin
+        db.commit()
+        db.refresh(contravention)
+        return contravention
+    except Exception as e:
+        db.rollback()
+        return {"error": f"Erreur lors de la mise à jour du commentaire admin: {str(e)}"}
+
+def admin_contravention_list(db: Session, skip: int = 0, limit: int = 100):
+    """Récupère la liste de toutes les contraventions pour l'admin avec pagination."""
+    try:
+        contraventions = (
+            db.query(Contravention)
+            .options(
+                joinedload(Contravention.vehicule),
+                joinedload(Contravention.attribuer_par_utilisateur),
+                joinedload(Contravention.emplacement),
+                joinedload(Contravention.raison_contravention),
+                joinedload(Contravention.modifier_par_utilisateur),
+            )
+            .order_by(Contravention.id.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
+        return contraventions
+    except Exception as e:
+        return {"error": f"Erreur lors de la récupération des contraventions: {str(e)}"}

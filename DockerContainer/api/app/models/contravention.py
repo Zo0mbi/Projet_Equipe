@@ -24,6 +24,7 @@ class Contravention(Base):
     date_entrer = Column(DateTime, nullable=False, default=now_est_edt)
     date_modification = Column(DateTime, nullable=True, default=now_est_edt, onupdate=now_est_edt)
     modifier_par = Column(Integer, ForeignKey("utilisateurs.id"), nullable=True, index=True)
+    commentaire_admin = Column(Text, nullable=True)
 
     vehicule = relationship("Vehicule", foreign_keys=[vehicle_id])
     attribuer_par_utilisateur = relationship("Utilisateur", foreign_keys=[attribuer_par])

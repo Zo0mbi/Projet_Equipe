@@ -3,7 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8000', // URL de l'API FastAPI (à changer selon l'environnement)
+  baseURL: 'http://127.0.0.1:8000', // URL de l'API FastAPI (à changer selon l'environnement)
   headers: {
     'Content-Type': 'application/json',
   },
