@@ -355,7 +355,10 @@ class ContraventionAdminListResponse(BaseModel):
 class CommentaireAdminUpdate(BaseModel):
     """Schema de mise a jour du commentaire admin d'une contravention."""
 
-    commentaire_admin: str | None = Field(default=None, description="Commentaire admin")
+    commentaire_admin: str | None = Field(
+        ...,
+        description="Commentaire admin"
+    )
 
     class Config:
         json_schema_extra = {

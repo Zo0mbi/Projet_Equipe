@@ -546,6 +546,7 @@ def get_vehicule_contravention_stats(db: Session):
 def crud_update_commentaire_admin(db: Session, contravention_id: int, commentaire_admin: str):
     """Met à jour le commentaire admin d'une contravention."""
     try:
+        print(f"Updating contravention ID {contravention_id} with commentaire_admin: {commentaire_admin}")
         contravention = db.query(Contravention).filter(Contravention.id == contravention_id).first()
         if contravention is None:
             return None
