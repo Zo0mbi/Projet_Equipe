@@ -43,30 +43,8 @@ const HomeScreen = ({ navigation }: any) => {
   const [captchaToken, setCaptchaToken] = useState('');
   const [captchaReponse, setCaptchaReponse] = useState('');
 
-  //States s'occupant des inputs de l'inscription
-  const [registerNom, setRegisterNom] = useState('');
-  const [registerPrenom, setRegisterPrenom] = useState('');
-  const [registerCourriel, setRegisterCourriel] = useState('');
-  const [registerMotDePasse, setRegisterMotDePasse] = useState('');
-  const [registerConfirmation, setRegisterConfirmation] = useState('');
-
-  //States pour détecter une modification des champs, pour seulement afficher une erreur après une première modification
-  const [registerNomEstModifier, setRegisterNomEstModifier] = useState(false);
-  const [registerPrenomEstModifier, setRegisterPrenomEstModifier] = useState(false);
-  const [registerCourrielEstModifier, setRegisterCourrielEstModifier] = useState(false);
-  const [registerMotDePasseEstModifier, setRegisterMotDePasseEstModifier] = useState(false);
-  const [registerConfirmationEstModifier, setRegisterConfirmationEstModifier] = useState(false);
-
   //States s'occupant de l'activation et désactivation des fenêtres de connexion et d'inscription
   const [afficherLogin, setAfficherLogin] = useState(false);
-  const [afficherRegister, setAfficherRegister] = useState(false);
-  const [afficherConfirmationRegister, setAfficherConfirmationRegister] = useState(false);
-
-  // Recherche de contraventions
-  const [searchTicket, setSearchTicket] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
-  const [foundContraventions, setFoundContraventions] = useState<any[] | null>(null);
-  const [hasSearched, setHasSearched] = useState(false);
 
   const handleAccederEspace = async () => {
     try {
@@ -77,7 +55,6 @@ const HomeScreen = ({ navigation }: any) => {
       } else if (utilisateur.role.id === 2) {
         navigation.navigate("EmployeeDashboard");
       } else {
-        navigation.navigate("MyTickets");
       }
 
     } catch {
@@ -122,7 +99,6 @@ const HomeScreen = ({ navigation }: any) => {
       } else if (utilisateur.role.id === 2) {
           navigation.navigate("EmployeeDashboard");
       } else {
-          navigation.navigate("MyTickets");
       }
 
     } catch (error: any) {
@@ -141,98 +117,6 @@ const HomeScreen = ({ navigation }: any) => {
         setLoginAttempts(nouvelleTentative);
         setLoginError(t('login_error_invalid').replace('{n}', String(nouvelleTentative)));
       }
-    }
-  };
-
-  const verifPrenomInscription = () => {
-    //S'assure que le champ n'est pas undefined
-    if(!registerPrenom) return false
-    //Logique de vérification
-    return registerPrenom.length > 0
-  };
-
-  const verifNomInscription = () => {
-    //S'assure que le champ n'est pas undefined
-    if(!registerNom) return false
-    //Logique de vérification
-    return registerNom.length > 0
-  };
-
-  const verifCourrielInscription = () => {
-    //S'assure que le champ n'est pas undefined
-    if(!registerCourriel) return false
-    //Logique de vérification
-    const regexCourriel = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regexCourriel.test(registerCourriel)
-  };
-
-  const verifMotDePasseInscription = () => {
-    //S'assure que le champ n'est pas undefined
-    if(!registerMotDePasse) return false
-    //Logique de vérification
-    return registerMotDePasse.length >= 8
-  };
-
-  const verifConfirmationMotDePasseInscription = () => {
-    //S'assure que le champ n'est pas undefined
-    if(!registerConfirmation) return false
-    //Logique de vérification
-    return registerConfirmation.length >= 8 && registerConfirmation === registerMotDePasse
-  };
-
-  //Boolean pour vérifier si le formulaire est valide, appele tout les autres verifs
-  const verifFormulaireValide = (
-    verifPrenomInscription() &&
-    verifNomInscription() &&
-    verifCourrielInscription() &&
-    verifMotDePasseInscription() &&
-    verifConfirmationMotDePasseInscription()
-  );
-
-  const handleInscription = async () => {
-
-    try {
-      await ApiService.register(
-        registerCourriel,
-        registerMotDePasse,
-        registerNom,
-        registerPrenom
-      );
-
-      //Ferme la fenêtre d'inscription puis ouvre celle de login avec un message de succès
-      setAfficherConfirmationRegister(true);
-      setAfficherRegister(false);
-      setAfficherLogin(true);
-      //Vide les champs d'inscription
-      setRegisterNom('');
-      setRegisterPrenom('');
-      setRegisterCourriel('');
-      setRegisterMotDePasse('');
-      setRegisterConfirmation('');
-
-    } catch {
-      Alert.alert("Erreur", "Erreur lors de l'inscription");
-    }
-  };
-
-  const handleSearchByTicket = async () => {
-    if (!searchTicket.trim()) {
-      Alert.alert(t('error'), t('search_enter_number'));
-      return;
-    }
-
-    setIsSearching(true);
-    setHasSearched(false);
-    try {
-      const result = await ApiService.getContraventionsParNumero(searchTicket.trim().toUpperCase());
-      setFoundContraventions(result ? [result] : []);
-      setHasSearched(true);
-    } catch (e) {
-      console.error(e);
-      setFoundContraventions([]);
-      setHasSearched(true);
-    } finally {
-      setIsSearching(false);
     }
   };
 
@@ -267,275 +151,78 @@ const HomeScreen = ({ navigation }: any) => {
           textStyle={styles.ctaText}
         />
 
-        <View style={styles.hubDivider}>
-          <View style={styles.hubLine} />
-          <Text style={styles.hubOr}>{t('or')}</Text>
-          <View style={styles.hubLine} />
-        </View>
-
-        <View style={styles.quickSearch}>
-          <Text style={styles.quickSearchLabel}>{t('quick_ticket_search')}</Text>
-          <View style={styles.searchBar}>
-            <Input 
-              placeholder="Ex: GES-000001"
-              value={searchTicket}
-              onChangeText={setSearchTicket}
-              autoCapitalize="characters"
-              containerStyle={styles.searchField}
-              style={styles.searchFieldPadding}
-            />
-            <TouchableOpacity 
-              style={[styles.searchGo, isSearching && styles.searchDisabled]}
-              onPress={handleSearchByTicket}
-              disabled={isSearching}
-            >
-              {isSearching ? <ActivityIndicator color="#FFFFFF" size="small" /> : <Search color="#FFFFFF" size={20} />}
-            </TouchableOpacity>
-          </View>
-
-          {hasSearched && foundContraventions && (
-            <View style={styles.quickResults}>
-              {foundContraventions.length > 0 ? (
-                foundContraventions.map((ticket) => (
-                  <TicketCard key={ticket.numero_contravention} ticket={ticket} showPayButton={true} onPay={() => Linking.openURL("https://gesparc.ca/#payer")} />
-                ))
-              ) : (
-                <View style={styles.noResultBox}>
-                  <AlertCircle size={24} color={COLORS.textLight} />
-                  <Text style={styles.emptySearch}>{t('no_ticket_found')}</Text>
-                </View>
-              )}
-            </View>
-          )}
-
-        </View>
       </Card>
 
-
-
-      <View style={styles.featuresGrid}>
-        <Card style={styles.featureMiniCard}>
-          <View style={styles.miniIconBox}>
-            <Ticket size={24} color={COLORS.primary} />
+      {/* Menu de connection */}
+      <Modal visible={afficherLogin} transparent={true} animationType="none">
+        <TouchableWithoutFeedback onPress={() => {setAfficherLogin(false)}}>
+          <View style={styles.overlay}>
+            <TouchableWithoutFeedback onPress={() => {}}>
+              <View style={styles.modalContent}>
+                <Card>
+                  <View style={styles.header}>
+                    <Text style={styles.modalTitle}>{t('connexion_title')}</Text>
+                  </View>
+                  <Input
+                    label={t('email')}
+                    placeholder=""
+                    value={loginCourriel}
+                    onChangeText={setLoginCourriel}
+                    keyboardType="email-address"
+                  />
+                  <Input
+                    label={t('password')}
+                    placeholder=""
+                    value={loginMotDePasse}
+                    onChangeText={setLoginMotDePasse}
+                    secureTextEntry={true}
+                  />
+                  {loginError !== '' && (
+                    <View style={styles.errorBox}>
+                      <Text style={styles.errorText}>⚠ {loginError}</Text>
+                    </View>
+                  )}
+                  {captchaRequired && (
+                    <View style={styles.captchaContainer}>
+                      <Text style={styles.captchaLabel}>{t('captcha_robot')}</Text>
+                      {captchaImage !== '' && (
+                        <View style={styles.captchaImageBox}>
+                          {Platform.OS === 'web'
+                            ? <div dangerouslySetInnerHTML={{ __html: captchaImage }} />
+                            : <Image
+                              source={{ uri: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(captchaImage)}` }}
+                              style={styles.captchaImage}
+                            />
+                          }
+                        </View>
+                      )}
+                      <Input
+                        placeholder={t('captcha_enter')}
+                        value={captchaReponse}
+                        onChangeText={setCaptchaReponse}
+                        keyboardType="numeric"
+                        containerStyle={styles.captchaInput}
+                      />
+                      <TouchableOpacity onPress={chargerCaptcha}>
+                        <Text style={styles.captchaRefresh}>{t('captcha_new')}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                  <Button title={t('sign_in')} onPress={handleConnexion} style={styles.btn}/>
+                </Card>
+              </View>
+            </TouchableWithoutFeedback>
           </View>
-          <Text style={styles.miniTitle}>{t('digital_tickets')}</Text>
-          <Text style={styles.miniDesc}>{t('digital_tickets_desc')}</Text>
-        </Card>
+        </TouchableWithoutFeedback>
+      </Modal>
 
-        <Card style={styles.featureMiniCard}>
-          <View style={styles.miniIconBox}>
-            <CreditCard size={24} color={COLORS.primary} />
-          </View>
-          <Text style={styles.miniTitle}>{t('fast_payment')}</Text>
-          <Text style={styles.miniDesc}>{t('fast_payment_desc')}</Text>
-        </Card>
-      </View>
 
-      <View style={styles.publicInfoSection}>
-        <View style={styles.sectionHeader}>
-          <ShieldCheck size={20} color={COLORS.primary} />
-          <Text style={styles.sectionTitle}>{t('parking_info')}</Text>
-        </View>
 
-        <View style={styles.infoCardsRow}>
-          <Card style={styles.infoCard}>
-            <View style={styles.infoIconHeader}>
-              <Clock size={20} color={COLORS.primary} />
-              <Text style={styles.infoCardTitle}>{t('schedule')}</Text>
-            </View>
-            <View style={styles.scheduleRow}>
-              <Text style={styles.dayText}>{t('mon_ven')}</Text>
-              <Text style={styles.hourText}>08h - 21h</Text>
-            </View>
-            <View style={styles.scheduleRow}>
-              <Text style={styles.dayText}>{t('saturday')}</Text>
-              <Text style={styles.hourText}>09h - 18h</Text>
-            </View>
-            <View style={styles.scheduleRow}>
-              <Text style={styles.dayText}>{t('sunday')}</Text>
-              <Text style={[styles.hourText, styles.hourTextSuccess]}>{t('free')}</Text>
-            </View>
-          </Card>
 
-          <Card style={styles.infoCard}>
-            <View style={styles.infoIconHeader}>
-              <CreditCard size={20} color={COLORS.primary} />
-              <Text style={styles.infoCardTitle}>{t('payment')}</Text>
-            </View>
-            <View style={styles.paymentMethod}>
-              <CreditCard size={14} color={COLORS.textLight} />
-              <Text style={styles.paymentText}>App ParkFlow</Text>
-            </View>
-            <View style={styles.paymentMethod}>
-              <CreditCard size={14} color={COLORS.textLight} />
-              <Text style={styles.paymentText}>Bornes & Cartes</Text>
-            </View>
-            <View style={styles.paymentMethod}>
-              <Ticket size={14} color={COLORS.textLight} />
-              <Text style={styles.paymentText}>SMS (Plaque)</Text>
-            </View>
-          </Card>
-        </View>
-      </View>
+
 
       {/* Actions principales */}
       <View style={styles.footer}>
-        {/* Menu de connection */}
-        <Modal visible={afficherLogin} transparent={true} animationType="none">
-          <TouchableWithoutFeedback onPress={() => {setAfficherLogin(false); setAfficherConfirmationRegister(false)}}>
-            <View style={styles.overlay}>
-              <TouchableWithoutFeedback onPress={() => {}}>
-                <View style={styles.modalContent}>
-                  <Card>
-                      <View style={styles.header}>
-                        <Text style={styles.modalTitle}>{t('connexion_title')}</Text>
-                      </View>
-                    <Input
-                      label={t('email')}
-                      placeholder=""
-                      value={loginCourriel}
-                      onChangeText={setLoginCourriel}
-                      keyboardType="email-address"
-                    />
-                    <Input
-                      label={t('password')}
-                      placeholder=""
-                      value={loginMotDePasse}
-                      onChangeText={setLoginMotDePasse}
-                      secureTextEntry={true}
-                    />
-                    {loginError !== '' && (
-                      <View style={styles.errorBox}>
-                        <Text style={styles.errorText}>⚠ {loginError}</Text>
-                      </View>
-                    )}
-                    {captchaRequired && (
-                      <View style={styles.captchaContainer}>
-                        <Text style={styles.captchaLabel}>{t('captcha_robot')}</Text>
-                        {captchaImage !== '' && (
-                          <View style={styles.captchaImageBox}>
-                            {Platform.OS === 'web'
-                              ? <div dangerouslySetInnerHTML={{ __html: captchaImage }} />
-                              : <Image
-                                  source={{ uri: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(captchaImage)}` }}
-                                  style={styles.captchaImage}
-                                />
-                            }
-                          </View>
-                        )}
-                        <Input
-                          placeholder={t('captcha_enter')}
-                          value={captchaReponse}
-                          onChangeText={setCaptchaReponse}
-                          keyboardType="numeric"
-                          containerStyle={styles.captchaInput}
-                        />
-                        <TouchableOpacity onPress={chargerCaptcha}>
-                          <Text style={styles.captchaRefresh}>{t('captcha_new')}</Text>
-                        </TouchableOpacity>
-                      </View>
-                    )}
-                    <Button title={t('sign_in')} onPress={handleConnexion} style={styles.btn}/>
-                    <Button
-                      title={t('register')}
-                      variant="outline"
-                      onPress={() => {
-                        setAfficherLogin(false);
-                        setAfficherRegister(true);
-                      }}
-                      style={styles.btn}
-                    />
-                      <View style={styles.header}>
-                          {afficherConfirmationRegister &&
-                          <Text style={styles.infoText}>{t('register_success')}</Text>}
-                      </View>
-                  </Card>
-                </View>
-              </TouchableWithoutFeedback>
-            </View>
-          </TouchableWithoutFeedback>
-        </Modal>
-
-        {/* Menu d'inscription */}
-        <Modal visible={afficherRegister} transparent={true} animationType="none">
-          <TouchableWithoutFeedback onPress={() => setAfficherRegister(false)}>
-            <View style={styles.overlay}>
-              <TouchableWithoutFeedback onPress={() => {}}>
-                <View style={styles.modalContent}>
-                  <Card>
-                    <View style={styles.header}>
-                      <Text style={styles.modalTitle}>{t('inscription_title')}</Text>
-                    </View>
-                    <Input
-                      label={t('first_name')}
-                      placeholder=""
-                      value={registerPrenom}
-                      onChangeText={(texte) => {
-                        setRegisterPrenom(texte);
-                        setRegisterPrenomEstModifier(true);
-                      }}
-                      error={registerPrenomEstModifier && !verifPrenomInscription() ? t('err_enter_first_name') : undefined}
-                    />
-                    <Input
-                      label={t('last_name')}
-                      placeholder=""
-                      value={registerNom}
-                      onChangeText={(texte) => {
-                        setRegisterNom(texte);
-                        setRegisterNomEstModifier(true);
-                      }}
-                      error={registerNomEstModifier && !verifNomInscription() ? t('err_enter_last_name') : undefined}
-                    />
-                    <Input
-                      label={t('email')}
-                      placeholder=""
-                      value={registerCourriel}
-                      onChangeText={(texte) => {
-                        setRegisterCourriel(texte);
-                        setRegisterCourrielEstModifier(true);
-                      }}
-                      keyboardType="email-address"
-                      error={registerCourrielEstModifier && !verifCourrielInscription() ? t('err_enter_email') : undefined}
-                    />
-                    <Input
-                      label={t('password')}
-                      placeholder=""
-                      value={registerMotDePasse}
-                      onChangeText={(texte) => {
-                        setRegisterMotDePasse(texte);
-                        setRegisterMotDePasseEstModifier(true);
-                      }}
-                      secureTextEntry={true}
-                      error={registerMotDePasseEstModifier && !verifMotDePasseInscription() ? t('err_enter_password') : undefined}
-                    />
-                    <Input
-                      label={t('confirm_password')}
-                      placeholder=""
-                      value={registerConfirmation}
-                      onChangeText={(texte) => {
-                        setRegisterConfirmation(texte);
-                        setRegisterConfirmationEstModifier(true);
-                      }}
-                      secureTextEntry={true}
-                      error={registerConfirmationEstModifier && !verifConfirmationMotDePasseInscription() ? t('err_passwords_match') : undefined}
-                    />
-                    <Button title={t('register_submit')} onPress={handleInscription} style={styles.btn} disabled={!verifFormulaireValide}/>
-                  </Card>
-                </View>
-              </TouchableWithoutFeedback>
-            </View>
-          </TouchableWithoutFeedback>
-        </Modal>
-
-        <TouchableOpacity
-          style={styles.secondaryBtn}
-          onPress={() => navigation.navigate('About')}
-          activeOpacity={0.6}
-        >
-          <Text style={[styles.secondaryBtnText, styles.primaryText]}>{t('discover')}</Text>
-          <ArrowRight size={18} color={COLORS.primary} />
-        </TouchableOpacity>
-
         <Text style={styles.copyright}>
           {t('copyright')}
         </Text>

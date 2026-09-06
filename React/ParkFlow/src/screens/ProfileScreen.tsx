@@ -11,19 +11,19 @@ import {
   TouchableWithoutFeedback,
   Modal,
 } from 'react-native';
-import { getScale } from '../../utils/responsive';
+import { getScale } from '../utils/responsive';
 import * as Lucide from 'lucide-react-native';
 const { User, ShieldCheck, ArrowLeft } = Lucide;
 const Phone = (Lucide as any).Phone || (Lucide as any).PhoneCall || (Lucide as any).Smartphone || User;
 const Mail = (Lucide as any).Mail || User;
-import { SPACING, SIZES } from '../../constants/theme';
-import { useSettings } from '../../context/SettingsContext';
-import ScreenContainer from '../../components/common/ScreenContainer';
-import Input from '../../components/common/Input';
-import Button from '../../components/common/Button';
-import Card from '../../components/common/Card';
-import { ApiService } from '../../api/api';
-import { Utilisateur } from '../../types/database';
+import { SPACING, SIZES } from '../constants/theme';
+import { useSettings } from '../context/SettingsContext';
+import ScreenContainer from '../components/common/ScreenContainer';
+import Input from '../components/common/Input';
+import Button from '../components/common/Button';
+import Card from '../components/common/Card';
+import { ApiService } from '../api/api';
+import { Utilisateur } from '../types/database';
 
 /**
  * Écran de profil utilisateur.

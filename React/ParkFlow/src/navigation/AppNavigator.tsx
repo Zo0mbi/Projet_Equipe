@@ -10,11 +10,6 @@ import DashboardScreen from '../screens/employee/DashboardScreen';
 import CreateTicketScreen from '../screens/employee/CreateTicketScreen';
 import SearchVehicleScreen from '../screens/employee/SearchVehicleScreen';
 
-// Public / Clients
-import MyTicketsScreen from '../screens/public/MyTicketsScreen';
-import AboutScreen from '../screens/public/AboutScreen';
-import ProfileScreen from '../screens/public/ProfileScreen';
-
 // Administrateurs
 import AdminDashboardScreen from '../screens/admin/AdminDashboardScreen';
 import UserManagementScreen from '../screens/admin/UserManagementScreen';
@@ -23,8 +18,9 @@ import VehiculeManagementScreen from '../screens/admin/VehiculeManagementScreen'
 import EmplacementManagementScreen from '../screens/admin/EmplacementManagementScreen';
 import RaisonManagementScreen from '../screens/admin/RaisonManagementScreen';
 
-// Paramètres généraux
-import SettingsScreen from '../screens/public/SettingsScreen';
+// Menu
+import ProfileScreen from '../screens/ProfileScreen';
+import SettingsScreen from '../screens/SettingsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -37,7 +33,6 @@ const linking = {
       EmployeeDashboard: 'employee/dashboard',
       CreateTicket: 'employee/create-ticket',
       SearchVehicle: 'employee/search-vehicle',
-      MyTickets: 'public/my-tickets',
       About: 'about',
       Profile: 'profile',
       AdminDashboard: 'admin/dashboard',
@@ -68,11 +63,6 @@ const AppNavigator = () => {
         <Stack.Screen name="CreateTicket" component={CreateTicketScreen} />
         <Stack.Screen name="SearchVehicle" component={SearchVehicleScreen} />
 
-        {/* Espace Client/Public */}
-        <Stack.Screen name="MyTickets" component={MyTicketsScreen} />
-        <Stack.Screen name="About" component={AboutScreen} />
-        <Stack.Screen name="Profile" component={ProfileScreen} />
-
         {/* Espace Admin */}
         <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} />
         <Stack.Screen name="UserManagement" component={UserManagementScreen} />
@@ -81,7 +71,8 @@ const AppNavigator = () => {
         <Stack.Screen name="EmplacementManagement" component={EmplacementManagementScreen} />
         <Stack.Screen name="RaisonManagement" component={RaisonManagementScreen} />
 
-        {/* Paramètres */}
+        {/* Menu */}
+        <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
         
       </Stack.Navigator>

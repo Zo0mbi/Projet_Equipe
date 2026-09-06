@@ -1,8 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, useWindowDimensions, Alert, Modal, TouchableWithoutFeedback, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  ActivityIndicator,
+  useWindowDimensions,
+  Alert,
+  Modal,
+  TouchableWithoutFeedback,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StatusBar, Image
+} from 'react-native';
 import ScreenContainer from '../../components/common/ScreenContainer';
 import Input from '../../components/common/Input';
 import Card from '../../components/common/Card';
+import Button from '../../components/common/Button';
 import { ApiService } from '../../api/api';
 import { Utilisateur } from '../../types/database';
 import { SPACING, SIZES } from '../../constants/theme';
@@ -11,6 +27,13 @@ import { Search, ShieldCheck, Clock, ChevronDown } from 'lucide-react-native';
 import Svg, { Polyline, Path, Line } from 'react-native-svg';
 import { getScale } from '../../utils/responsive';
 import { BriefcaseBusiness, Crown, User } from 'lucide-react';
+
+const PlusIcon = ({ size = 24, color = "#000000" }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <Line x1="12" y1="5" x2="12" y2="19" />
+      <Line x1="5" y1="12" x2="19" y2="12" />
+    </Svg>
+);
 
 const PencilIcon = ({ size = 24, color = "#000000" }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -60,9 +83,24 @@ const UserManagementScreen = () => {
   // État du menu déroulant pour le filtre des rôles
   const [showRoleFilter, setShowRoleFilter] = useState(false);
 
+  //
+  const [isFormVisible, setIsFormVisible] = useState(false);
+  const [editingUserId, setEditingUserId] = useState<number | null>(null);
+  const [formLoading, setFormLoading] = useState(false);
+
+  //States s'occupant des inputs de l'inscription
+  const [registerNom, setRegisterNom] = useState('');
+  const [registerPrenom, setRegisterPrenom] = useState('');
+  const [registerCourriel, setRegisterCourriel] = useState('');
+  const [registerTelephone, setRegisterTelephone] = useState<string | undefined>('');
+  const [registerMotDePasse, setRegisterMotDePasse] = useState('');
+  const [registerConfirmation, setRegisterConfirmation] = useState('');
+  const [registerRole, setRegisterRole] = useState<number | undefined>(2);
+  const [registerStatus, setRegisterStatus] = useState(true);
+
+
   const ROLES = [
     { id: undefined, nom: 'Tous les rôles' },
-    { id: 1, nom: 'Public' },
     { id: 2, nom: 'Employé' },
     { id: 3, nom: 'Admin' }
   ];
@@ -95,21 +133,28 @@ const UserManagementScreen = () => {
     }
   };
 
-  const [isFormVisible, setIsFormVisible] = useState(false);
-  const [editingUserId, setEditingUserId] = useState<number | null>(null);
-  const [editForm, setEditForm] = useState({ nom: '', prenom: '', email: '', numero_telephone: '', roleId: undefined as number | undefined, estActif: true });
-  const [formLoading, setFormLoading] = useState(false);
-
-  const handleOpenForm = (user: Utilisateur) => {
-    setEditingUserId(user.id);
-    setEditForm({
-      nom: user.nom || '',
-      prenom: user.prenom || '',
-      email: user.email || '',
-      numero_telephone: user.telephone || '',
-      roleId: user.role?.id,
-      estActif: user.est_actif !== false
-    });
+  const handleOpenForm = (user?: Utilisateur) => {
+    if (user) {
+      setEditingUserId(user.id);
+      setRegisterPrenom(user.prenom || '');
+      setRegisterNom(user.nom || '');
+      setRegisterCourriel(user.email || '');
+      setRegisterTelephone(user.telephone || '');
+      setRegisterMotDePasse('');
+      setRegisterConfirmation('');
+      setRegisterRole(user.role?.id);
+      setRegisterStatus(user.est_actif !== false);
+    } else {
+      setEditingUserId(null);
+      setRegisterPrenom('');
+      setRegisterNom('');
+      setRegisterCourriel('');
+      setRegisterTelephone('');
+      setRegisterMotDePasse('');
+      setRegisterConfirmation('');
+      setRegisterRole(2);
+      setRegisterStatus(true);
+    }
     setIsFormVisible(true);
   };
 
@@ -118,40 +163,49 @@ const UserManagementScreen = () => {
     setEditingUserId(null);
   };
 
-  const handleSaveUserInfo = async () => {
-    if (!editingUserId) return;
-    setFormLoading(true);
-    try {
-      await ApiService.adminUpdateUtilisateur(editingUserId, {
-        nom: editForm.nom,
-        prenom: editForm.prenom,
-        email: editForm.email,
-        numero_telephone: editForm.numero_telephone
-      });
-      
-      const user = users.find(u => u.id === editingUserId);
-      if (user && user.role?.id !== editForm.roleId && editForm.roleId !== undefined) {
-        await ApiService.adminUpdateUserRole(editingUserId, editForm.roleId);
-      }
-      if (user && user.est_actif !== editForm.estActif) {
-        await ApiService.adminUpdateUserActif(editingUserId);
-      }
-
-      handleCloseForm();
-      fetchUsers();
-    } catch {
-      Alert.alert(t('error'), t('err_user_update'));
-    } finally {
-      setFormLoading(false);
-    }
-  };
-
   useEffect(() => {
     fetchUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, roleId, debouncedSearch]);
 
+  const handleSubmit = async () => {
+    if (!verifFormulaireValide()) return;
 
+    setFormLoading(true);
+    try {
+      if (editingUserId) {
+        await ApiService.adminUpdateUtilisateur(editingUserId, {
+          nom: registerNom,
+          prenom: registerPrenom,
+          email: registerCourriel,
+          numero_telephone: registerTelephone
+        });
+
+        const user = users.find(u => u.id === editingUserId);
+        if (user && user.role?.id !== registerRole && registerRole !== undefined) {
+          await ApiService.adminUpdateUserRole(editingUserId, registerRole);
+        }
+        if (user && user.est_actif !== registerStatus) {
+          await ApiService.adminUpdateUserActif(editingUserId);
+        }
+      } else {
+        await ApiService.register(
+            registerCourriel,
+            registerMotDePasse,
+            registerNom,
+            registerPrenom
+        );
+        // If your API supports it, assign registerRole right after creation here
+      }
+
+      handleCloseForm();
+      fetchUsers();
+    } catch {
+      Alert.alert(t('error'), editingUserId ? t('err_user_update') : t('err_user_create'));
+    } finally {
+      setFormLoading(false);
+    }
+  };
 
   const handleDeleteUser = async (userId: number) => {
     Alert.alert(
@@ -180,6 +234,53 @@ const UserManagementScreen = () => {
     const d = new Date(dateString);
     return isNaN(d.getTime()) ? "Date inconnue" : d.toLocaleDateString('fr-CA');
   };
+
+  const verifPrenomInscription = () => {
+    //S'assure que le champ n'est pas undefined
+    if(!registerPrenom) return false
+    //Logique de vérification
+    return registerPrenom.length > 0
+  };
+
+  const verifNomInscription = () => {
+    //S'assure que le champ n'est pas undefined
+    if(!registerNom) return false
+    //Logique de vérification
+    return registerNom.length > 0
+  };
+
+  const verifCourrielInscription = () => {
+    //S'assure que le champ n'est pas undefined
+    if(!registerCourriel) return false
+    //Logique de vérification
+    const regexCourriel = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regexCourriel.test(registerCourriel)
+  };
+
+  const verifMotDePasseInscription = () => {
+    const motDePasseRequis = editingUserId === null;
+    //S'assure que le champ n'est pas undefined
+    if(!motDePasseRequis && !registerMotDePasse) return true;
+    //Logique de vérification
+    return registerMotDePasse.length >= 8
+  };
+
+  const verifConfirmationMotDePasseInscription = () => {
+    const motDePasseRequis = editingUserId === null;
+    //S'assure que le champ n'est pas undefined
+    if(!motDePasseRequis && !registerConfirmation) return true;
+    //Logique de vérification
+    return registerConfirmation.length >= 8 && registerConfirmation === registerMotDePasse
+  };
+
+  //Boolean pour vérifier si le formulaire est valide, appele tout les autres verifs
+  const verifFormulaireValide = () => (
+      verifPrenomInscription() &&
+      verifNomInscription() &&
+      verifCourrielInscription() &&
+      verifMotDePasseInscription() &&
+      verifConfirmationMotDePasseInscription()
+  );
 
   const getIconeUtilisateur = (rId?: number) => {
     switch (rId) {
@@ -291,8 +392,17 @@ const UserManagementScreen = () => {
   return (
     <ScreenContainer scrollable={false} title={t('users_title')} withBackButton typePageAccess={"Utilisateurs"}>
       <View style={styles.header}>
-        <Text style={styles.title}>{t('admin_users')}</Text>
-        <Text style={styles.subtitle}>{t('users_subtitle')}</Text>
+        <View>
+            <Text style={styles.title}>{t('admin_users')}</Text>
+            <Text style={styles.subtitle}>{t('users_subtitle')}</Text>
+        </View>
+        <TouchableOpacity
+            style={styles.addBtn}
+            onPress={() => handleOpenForm()}
+        >
+          <PlusIcon size={20} color="#FFFFFF" />
+          <Text style={styles.addBtnText}>{t('new')}</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.filtersContainer}>
@@ -400,106 +510,117 @@ const UserManagementScreen = () => {
               >
                 <ScrollView showsVerticalScrollIndicator={false}>
                   <View style={styles.modalHeader}>
-                    <Text style={styles.formTitle}>{t('users_edit')}</Text>
+                    <Text style={styles.formTitle}>
+                      {editingUserId ? t('users_edit') : t('users_create')}
+                    </Text>
                     <TouchableOpacity onPress={handleCloseForm} style={styles.closeBtn}>
                       <Text style={styles.closeBtnText}>{t('cancel')}</Text>
                     </TouchableOpacity>
                   </View>
 
                   <Input
-                    placeholder={t('user_first_name_ph')}
-                    value={editForm.prenom}
-                    onChangeText={(txt) => setEditForm({ ...editForm, prenom: txt })}
-                    label={t('first_name')}
+                      label={t('first_name')}
+                      value={registerPrenom}
+                      onChangeText={setRegisterPrenom}
+                      error={registerPrenom.length > 0 && !verifPrenomInscription() ? t('err_enter_first_name') : undefined}
                   />
                   <Input
-                    placeholder={t('last_name')}
-                    value={editForm.nom}
-                    onChangeText={(txt) => setEditForm({ ...editForm, nom: txt })}
-                    label={t('last_name')}
+                      label={t('last_name')}
+                      value={registerNom}
+                      onChangeText={setRegisterNom}
+                      error={registerNom.length > 0 && !verifNomInscription() ? t('err_enter_last_name') : undefined}
                   />
                   <Input
-                    placeholder={t('email')}
-                    value={editForm.email}
-                    onChangeText={(txt) => setEditForm({ ...editForm, email: txt })}
-                    label={t('user_address_label')}
+                      label={t('email')}
+                      value={registerCourriel}
+                      onChangeText={setRegisterCourriel}
+                      keyboardType="email-address"
+                      error={registerCourriel.length > 0 && !verifCourrielInscription() ? t('err_enter_email') : undefined}
                   />
                   <Input
-                    placeholder={t('user_phone_ph')}
-                    value={editForm.numero_telephone}
-                    onChangeText={(txt) => setEditForm({ ...editForm, numero_telephone: txt.replace(/[^\d\s-]/g, '') })}
-                    keyboardType="phone-pad"
-                    label={t('user_phone_label')}
+                      label={t('user_phone_label')}
+                      value={registerTelephone}
+                      onChangeText={(txt) => setRegisterTelephone(txt.replace(/[^\d\s-]/g, ''))}
+                      keyboardType="phone-pad"
                   />
+                  {!editingUserId && (
+                      <>
+                        <Input
+                            label={editingUserId ? t('password') + ' (' + t('optional') + ')' : t('password')}
+                            value={registerMotDePasse}
+                            onChangeText={setRegisterMotDePasse}
+                            secureTextEntry
+                            error={registerMotDePasse.length > 0 && !verifMotDePasseInscription() ? t('err_enter_password') : undefined}
+                        />
+                        <Input
+                            label={t('confirm_password')}
+                            value={registerConfirmation}
+                            onChangeText={setRegisterConfirmation}
+                            secureTextEntry
+                            error={registerConfirmation.length > 0 && !verifConfirmationMotDePasseInscription() ? t('err_passwords_match') : undefined}
+                        />
+                      </>
+                  )}
+
 
                   <Text style={styles.inputLabelModal}>{t('user_role_colon')}</Text>
                   <View style={[styles.roleEditContainer, styles.mb16]}>
-                    {[1, 2, 3].map((rId) => (
-                      <TouchableOpacity
-                        key={rId}
-                        style={[
-                          styles.roleOptionBtn,
-                          editForm.roleId === rId && styles.roleOptionBtnActive,
-                          styles.primaryBorderStyle,
-                          styles.roleOptionBtnModal
-                        ]}
-                        onPress={() => setEditForm({...editForm, roleId: rId})}
-                      >
-                        <Text style={[
-                          styles.roleOptionBtnText,
-                          editForm.roleId === rId && styles.whiteText,
-                          styles.roleOptionBtnTextModal
-                        ]}>
-                          {rId === 1 ? 'Public' : rId === 2 ? (t('agent_role')) : 'Admin'}
-                        </Text>
-                      </TouchableOpacity>
+                    {[2, 3].map((rId) => (
+                        <TouchableOpacity
+                            key={rId}
+                            style={[
+                              styles.roleOptionBtn,
+                              registerRole === rId && styles.roleOptionBtnActive,
+                              styles.primaryBorderStyle,
+                              styles.roleOptionBtnModal
+                            ]}
+                            onPress={() => setRegisterRole(rId)}
+                        >
+                          <Text style={[
+                            styles.roleOptionBtnText,
+                            registerRole === rId && styles.whiteText,
+                            styles.roleOptionBtnTextModal
+                          ]}>
+                            {rId === 2 ? t('agent_role') : 'Admin'}
+                          </Text>
+                        </TouchableOpacity>
                     ))}
                   </View>
 
-                  <Text style={styles.inputLabelModal}>{t('user_status_colon')}</Text>
-                  <View style={styles.roleEditContainer}>
-                    <TouchableOpacity
-                      style={[
-                        styles.roleOptionBtn,
-                        editForm.estActif && styles.roleOptionBtnActive,
-                        styles.primaryBorderStyle,
-                        styles.roleOptionBtnModal
-                      ]}
-                      onPress={() => setEditForm({...editForm, estActif: true})}
-                    >
-                      <Text style={[
-                        styles.roleOptionBtnText,
-                        editForm.estActif && styles.whiteText,
-                        styles.roleOptionBtnTextModal
-                      ]}>{t('active').toUpperCase()}</Text>
-                    </TouchableOpacity>
+                  {editingUserId && (
+                      <>
+                        <Text style={styles.inputLabelModal}>{t('user_status_colon')}</Text>
+                        <View style={styles.roleEditContainer}>
+                          <TouchableOpacity
+                              style={[styles.roleOptionBtn, registerStatus && styles.roleOptionBtnActive, styles.primaryBorderStyle, styles.roleOptionBtnModal]}
+                              onPress={() => setRegisterStatus(true)}
+                          >
+                            <Text style={[styles.roleOptionBtnText, registerStatus && styles.whiteText, styles.roleOptionBtnTextModal]}>
+                              {t('active').toUpperCase()}
+                            </Text>
+                          </TouchableOpacity>
 
-                    <TouchableOpacity
-                      style={[
-                        styles.roleOptionBtn,
-                        !editForm.estActif && styles.errorActiveStyle,
-                        editForm.estActif && styles.errorBorderStyle,
-                        styles.roleOptionBtnModal
-                      ]}
-                      onPress={() => setEditForm({...editForm, estActif: false})}
-                    >
-                      <Text style={[
-                        styles.roleOptionBtnText,
-                        !editForm.estActif ? styles.whiteText : styles.errorTextStyle,
-                        styles.roleOptionBtnTextModal
-                      ]}>{t('inactive').toUpperCase()}</Text>
-                    </TouchableOpacity>
-                  </View>
+                          <TouchableOpacity
+                              style={[styles.roleOptionBtn, !registerStatus && styles.errorActiveStyle, registerStatus && styles.errorBorderStyle, styles.roleOptionBtnModal]}
+                              onPress={() => setRegisterStatus(false)}
+                          >
+                            <Text style={[styles.roleOptionBtnText, !registerStatus ? styles.whiteText : styles.errorTextStyle, styles.roleOptionBtnTextModal]}>
+                              {t('inactive').toUpperCase()}
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
+                      </>
+                  )}
 
                   <TouchableOpacity
-                    style={[styles.submitBtn, formLoading && styles.opacity70]}
-                    onPress={handleSaveUserInfo}
-                    disabled={formLoading}
+                      style={[styles.submitBtn, (formLoading || !verifFormulaireValide()) && styles.opacity70]}
+                      onPress={handleSubmit}
+                      disabled={formLoading || !verifFormulaireValide()}
                   >
                     {formLoading ? (
-                      <ActivityIndicator size="small" color="#FFFFFF" />
+                        <ActivityIndicator size="small" color="#FFFFFF" />
                     ) : (
-                      <Text style={styles.submitBtnText}>{t('save')}</Text>
+                        <Text style={styles.submitBtnText}>{t('save')}</Text>
                     )}
                   </TouchableOpacity>
                 </ScrollView>
@@ -518,7 +639,13 @@ const getStyles = (COLORS: any, width: number) => {
 
   return StyleSheet.create({
     header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
       marginBottom: SPACING.lg * scale,
+    },
+    headerLeft: {
+      flexDirection: 'column',
     },
     title: {
       fontSize: 24 * scale,
@@ -872,6 +999,60 @@ const getStyles = (COLORS: any, width: number) => {
     datesColumn: {
       flexDirection: 'column',
       gap: 4,
+    },
+    btn: {
+      height: 50 * scale,       // fixed height regardless of text size
+      minWidth: 10 * scale,    // fixed width (adjust to your layout)
+
+    },
+    btnText: {
+      fontSize: 25 * scale,
+      fontWeight: '900',
+    },
+    overlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.8)', // Plus sombre pour focus
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: SPACING.lg * scale,
+    },
+    modalContent: {
+      width: '100%',
+      maxWidth: 450 * scale,
+      borderRadius: SIZES.radius * 2 * scale,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: COLORS.border,
+      backgroundColor: COLORS.card,
+    },
+    modalTitle: {
+      fontSize: 24 * scale,
+      fontWeight: '900',
+      color: COLORS.text,
+      letterSpacing: -0.5,
+      marginBottom: SPACING.md * scale,
+      textAlign: 'center',
+      textTransform: 'uppercase',
+    },
+    modalTitleHeader: {
+      alignItems: 'center',
+    },
+    addBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: COLORS.primary,
+      paddingHorizontal: SPACING.md * scale,
+      paddingVertical: 10 * scale,
+      borderRadius: SIZES.radius * scale,
+      gap: 6 * scale,
+    },
+    addBtnText: {
+      color: '#FFFFFF',
+      fontWeight: '700',
+      fontSize: 14 * scale,
+    },
+    disabledInput: {
+      opacity: 0.5,
     },
   });
 };

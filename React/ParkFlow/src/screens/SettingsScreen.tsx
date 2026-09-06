@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, Switch, useWindowDimensions } from 'react-native';
-import ScreenContainer from '../../components/common/ScreenContainer';
-import { getScale } from '../../utils/responsive';
-import Card from '../../components/common/Card';
-import { useSettings } from '../../context/SettingsContext';
-import { SPACING, SIZES } from '../../constants/theme';
+import ScreenContainer from '../components/common/ScreenContainer';
+import { getScale } from '../utils/responsive';
+import Card from '../components/common/Card';
+import { useSettings } from '../context/SettingsContext';
+import { SPACING, SIZES } from '../constants/theme';
 import { Globe } from 'lucide-react-native';
 import * as Lucide from 'lucide-react-native';
 const Moon = (Lucide as any).Moon || (Lucide as any).MoonIcon || Globe;
@@ -31,9 +31,9 @@ const SettingsScreen = (_props: any) => {
             </View>
             <Text style={styles.settingText}>{theme === 'dark' ? t('dark_mode') : t('light_mode')}</Text>
           </View>
-          <Switch 
-            value={theme === 'dark'} 
-            onValueChange={(val) => setTheme(val ? 'dark' : 'light')} 
+          <Switch
+            value={theme === 'dark'}
+            onValueChange={(val) => setTheme(val ? 'dark' : 'light')}
             trackColor={{ false: COLORS.textLight + '40', true: COLORS.primary }}
             thumbColor={'#fff'}
           />
@@ -49,9 +49,9 @@ const SettingsScreen = (_props: any) => {
             </View>
             <Text style={styles.settingText}>{t('french')}</Text>
           </View>
-          <Switch 
-            value={lang === 'fr'} 
-            onValueChange={(val) => setLang(val ? 'fr' : 'en')} 
+          <Switch
+            value={lang === 'fr'}
+            onValueChange={(val) => setLang(val ? 'fr' : 'en')}
             trackColor={{ false: COLORS.border, true: '#3b82f6' }}
             thumbColor={'#fff'}
           />
@@ -64,9 +64,9 @@ const SettingsScreen = (_props: any) => {
             </View>
             <Text style={styles.settingText}>{t('english')}</Text>
           </View>
-          <Switch 
-            value={lang === 'en'} 
-            onValueChange={(val) => setLang(val ? 'en' : 'fr')} 
+          <Switch
+            value={lang === 'en'}
+            onValueChange={(val) => setLang(val ? 'en' : 'fr')}
             trackColor={{ false: COLORS.border, true: '#a855f7' }}
             thumbColor={'#fff'}
           />

@@ -127,8 +127,6 @@ const translations = {
     // Login modal
     connexion_title: 'CONNEXION',
     sign_in: 'Se Connecter',
-    register: "S'Inscrire",
-    register_success: 'Inscription faite avec succès.',
     captcha_robot: 'Vérification anti-robot',
     captcha_enter: 'Entrez la réponse',
     captcha_new: '🔄 Nouveau captcha',
@@ -138,18 +136,6 @@ const translations = {
     login_error_too_many: 'Trop de tentatives. Résolvez le captcha ci-dessous.',
     login_error_invalid: 'Courriel ou mot de passe incorrect. (Tentative {n})',
     login_error_captcha_load: 'Impossible de charger le captcha. Réessayez.',
-    // Register modal
-    inscription_title: 'INSCRIPTION',
-    register_submit: "S'inscrire",
-    confirm_password: 'Vérification du mot de passe',
-    err_enter_first_name: 'Veuillez entrer votre prénom.',
-    err_enter_last_name: 'Veuillez entrer votre nom.',
-    err_enter_email: 'Veuillez entrer un courriel valide.',
-    err_enter_password:
-      "Veuillez entrer un mot de passe d'au moins 8 caractères.",
-    err_passwords_match: 'Le mot de passe doit être le même que celui entré.',
-    discover: 'Découvrir ParkFlow',
-    copyright: '© 2026 ParkFlow. Tous droits réservés.',
     // Search errors
     search_enter_number: 'Veuillez entrer un numéro de contravention',
     no_ticket_found: 'Aucun ticket trouvé pour ce numéro.',
@@ -214,6 +200,7 @@ const translations = {
       "Une erreur est survenue. Vérifiez que la raison n'existe pas déjà.",
     err_user_deactivate: "Erreur lors de la désactivation de l'utilisateur.",
     err_user_update: 'Erreur lors de la modification des informations.',
+    err_user_create: 'Erreur lors de la création de l\'utilisateur.',
     confirm_delete_zone: 'Êtes-vous sûr de vouloir supprimer cette zone ?',
     delete_label: 'Supprimer',
     reason_edit: 'Modifier la raison',
@@ -242,9 +229,22 @@ const translations = {
     users_subtitle: 'Gérez les accès et informations',
     users_search: 'Rechercher par nom ou email...',
     users_none: 'Aucun utilisateur trouvé.',
+    users_create: 'Création d\'un utilisateur',
     users_edit: "Modifier l'utilisateur",
     users_access_denied: 'Accès Refusé',
     users_forbidden: 'Accès Interdit',
+    //Création d'employés
+    creation_title: 'CRÉATION D\'EMPLOYÉ',
+    register_submit: "Créer",
+    confirm_password: 'Vérification du mot de passe',
+    err_enter_first_name: 'Veuillez entrer votre prénom.',
+    err_enter_last_name: 'Veuillez entrer votre nom.',
+    err_enter_email: 'Veuillez entrer un courriel valide.',
+    err_enter_password:
+        "Veuillez entrer un mot de passe d'au moins 8 caractères.",
+    err_passwords_match: 'Le mot de passe doit être le même que celui entré.',
+    discover: 'Découvrir ParkFlow',
+    copyright: '© 2026 ParkFlow. Tous droits réservés.',
     //Gestion contraventions admin
     contravention_title: 'Gestion des contraventions',
     contravention_search:
