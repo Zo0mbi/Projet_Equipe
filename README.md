@@ -1,7 +1,8 @@
 # ProjetSession
 
-**ParkFlow** est une application permettant de gérer et visualiser des données liées au stationnement.
+**LE PROJET EST MAINTENANT ARCHIVER**
 
+**ParkFlow** est une application permettant de gérer et visualiser des données liées au stationnement.
 Le projet est divisé en deux parties :
 - 🐳 Backend avec Docker (API + base de données)
 - ⚛️ Frontend avec React
